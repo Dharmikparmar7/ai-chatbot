@@ -10,6 +10,7 @@ export default function Home() {
       content: "Yo, this is ChatterBot! How can I help you today?",
     },
   ]);
+  const [apiKey, setApiKey] = useState("");
 
 
   const Submit = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -20,6 +21,16 @@ export default function Home() {
   };
 
   const callGetResponse = async () => {
+    if (!apiKey) {
+      alert('Please enter your apikey.')
+      return false
+    }
+
+    if (!theInput) {
+      alert('Please enter message.')
+      return false
+    }
+
     setIsLoading(true);
     let temp = messages;
     temp.push({ role: "user", content: theInput });
@@ -27,27 +38,36 @@ export default function Home() {
     setTheInput("");
     console.log("Calling OpenAI...");
 
+
     const response = await fetch("/api", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
 
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ messages, apiKey }),
     });
 
     const data = await response.json();
-    const { output } = data;
-    console.log("OpenAI replied...", output.content);
+    const { output} = data;
+    // console.log("OpenAI replied...", output.content);
 
     setMessages((prevMessages) => [...prevMessages, output]);
     setIsLoading(false);
-
   };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between px-24 py-5">
       <h1 className="text-5xl font-sans">ChatterBot</h1>
+
+      <div className="w-full relative flex justify-center">
+        <label className="px-1 py-2">ChatGPT Api Key :</label>
+        <input
+          value={apiKey}
+          className="w-[30%] px-3 py-2 mx-2 text-black bg-gray-300 rounded"
+          onChange={(event) => setApiKey(event.target.value)}
+        ></input>
+      </div>
 
       <div className="flex  h-[35rem] w-[40rem] flex-col items-center bg-gray-600 rounded-xl">
         <div className=" h-full flex flex-col gap-2 overflow-y-auto py-8 px-3 w-full">
